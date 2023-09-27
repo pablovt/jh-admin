@@ -85,7 +85,7 @@ class AparelhoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //ServicosRelationManager::class,
+            ServicosRelationManager::class,
         ];
     }
     

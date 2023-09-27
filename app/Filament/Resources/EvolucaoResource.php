@@ -4,11 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EvolucaoResource\Pages;
 use App\Filament\Resources\EvolucaoResource\RelationManagers;
+use App\Filament\Resources\EvolucaoResource\RelationManagers\AparelhosRelationManager;
+use App\Filament\Resources\EvolucaoResource\RelationManagers\ServicosRelationManager;
 use App\Models\Aparelho;
 use App\Models\Evolucao;
 use App\Models\Servico;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -40,18 +43,21 @@ class EvolucaoResource extends Resource
                             ->options(Servico::all()->pluck('nome', 'id')->toArray())
                             ->reactive()
                             ->afterStateUpdated(fn (callable $set) => $set('aparelho_id', null)),
-                        Select::make('aparelho_id')
+                        CheckboxList::make('aparelhos')
                             ->label('Aparelho')
+                            ->relationship('aparelhos', 'nome')
+                            // ->multiple()
                             ->required()
-                            ->multiple()
+                            // ->preload()
                             ->options(function (callable $get) {
                                 $servico = Servico::find($get('servico_id'));
                                 if(!$servico)
-                                {
+                                { 
                                     return Aparelho::all()->pluck('nome', 'id');
-                                }
+                                }                                
                                 return $servico->aparelho->pluck('nome', 'id');
-                            }),
+                            })
+                            ->columns(2),
                         Select::make('profissional_id')
                             ->required()
                             ->relationship('profissional', 'nome')
@@ -76,7 +82,7 @@ class EvolucaoResource extends Resource
                 Tables\Columns\TextColumn::make('servico.nome')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('aparelho.nome')
+                Tables\Columns\TextColumn::make('aparelhos.nome')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('profissional.nome')
@@ -114,7 +120,8 @@ class EvolucaoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            //AparelhosRelationManager::class,
+            //ServicosRelationManager::class,
         ];
     }
     
@@ -125,5 +132,5 @@ class EvolucaoResource extends Resource
             'create' => Pages\CreateEvolucao::route('/create'),
             'edit' => Pages\EditEvolucao::route('/{record}/edit'),
         ];
-    }    
+    }
 }
